@@ -1,32 +1,47 @@
 require 'prime'
 
-def secret_test(int, secret)
-  return false unless quick_fail(int, secret)
-  array = primes(int)
-  counter = array.size - 1
-  while counter > 0
-    x=1
-    counter.times do 
-      return false unless (secret.call(array[counter])+secret.call(array[counter-x]) == secret.call(array[counter]+array[counter-x]))
-      x+=1
-    end
-    counter-=1
+class AdditiveAnalyzer
+  def initialize(integer, secret)
+    @integer = integer
+    @secret = secret
   end
-  true
-end
 
-def quick_fail(int, secret)
-  return true if int <= 4
-  int-=1 until int.prime? 
-  nextPrime = int - 2
-  nextPrime-=2 until nextPrime.prime?
-  return false unless (secret.call(int)+secret.call(nextPrime)) == secret.call(int + nextPrime)
-  true
-end
+  def run!
+    return false unless highest_primes_check
+    prime_array = primes
+    repition = prime_array.size - 1
+    while repition > 0
+      counter=1
+      repition.times do 
+        x = prime_array[repition]
+        y = prime_array[repition-counter]
+        return false if !additive?(x, y)
+        counter+=1 
+      end
+      repition-=1
+    end
+    true
+  end
 
-def primes(int)
-  array = []
-  Prime.each(int) { |prime| array << prime }
-end
+  def highest_primes_check
+    return true if smallness_check
+    highestPrime = @integer
+    highestPrime-=1 until highestPrime.prime? 
+    nextHighestPrime = highestPrime - 2
+    nextHighestPrime-=2 until nextHighestPrime.prime?
+    additive?(highestPrime, nextHighestPrime)
+  end
 
-SECRETS = [Proc.new {|int| int}, Proc.new {|int| int*int}, Proc.new{|int| Math.cbrt(int)}, Proc.new {|int| int/200}, Proc.new {|int| int/1000} ]
+  def smallness_check
+    @integer <= 4
+  end
+
+  def additive?(x,y)
+    @secret.call(x)+@secret.call(y) == @secret.call(x + y)
+  end
+
+  def primes
+    array = []
+    Prime.each(@integer) { |prime| array << prime }
+  end
+end
