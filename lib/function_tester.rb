@@ -1,4 +1,5 @@
 require 'prime'
+require 'pry'
 
 class AdditiveAnalyzer
   def initialize(integer, secret)
@@ -8,19 +9,22 @@ class AdditiveAnalyzer
 
   def run!
     return false unless highest_primes_check
-    prime_array = primes
     repition = prime_array.size - 1
     while repition > 0
-      counter=1
-      repition.times do 
-        x = prime_array[repition]
-        y = prime_array[repition-counter]
-        return false if !additive?(x, y)
-        counter+=1 
-      end
+      additive_cycle(repition)
       repition-=1
     end
     true
+  end
+
+  def additive_cycle(repition)
+    counter=1
+    repition.times do 
+      x = prime_array[repition]
+      y = prime_array[repition-counter]
+      return false if !additive?(x, y)
+      counter+=1 
+    end
   end
 
   def highest_primes_check
@@ -40,7 +44,7 @@ class AdditiveAnalyzer
     @secret.call(x)+@secret.call(y) == @secret.call(x + y)
   end
 
-  def primes
+  def prime_array
     array = []
     Prime.each(@integer) { |prime| array << prime }
   end
